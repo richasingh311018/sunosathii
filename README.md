@@ -16,6 +16,129 @@ AI-powered financial safety companion for low-literacy, first-time, and rural/se
 - **Demo Mode** — Safe / Caution / High-Risk sample documents to try the full flow instantly
 
 ## Architecture
+# SunoSaathi — Architecture
+
+## Overview
+
+SunoSaathi is a single-page React application. There's no backend yet — all data (documents, community feed, Bank Mitra profile) is structured mock data designed to mirror what a real API/database would return, so the mock layer can be swapped for real services without touching the UI.
+
+## System Flow
+
+```mermaid
+flowchart TD
+    A[User Opens App] --> B[Welcome Screen]
+    B --> C[Language Selection - 11 languages]
+    C --> D[Home Dashboard]
+
+    D --> E[Scan Document]
+    D --> F[Ask Saathi - Chat]
+    D --> G[Community]
+    D --> H[Bank Mitra]
+    D --> I[Profile]
+
+    E --> E1[OCR + Risk Engine]
+    E1 --> E2[Risk Result: Green / Amber / Red]
+    E2 --> E3[SEE - Badge]
+    E2 --> E4[HEAR - Audio Explanation]
+    E2 --> E5[FEEL - Haptic Vibration]
+    E2 --> H
+
+    G --> G1[Record Voice Experience]
+    G1 --> G2[Voice → 2D Avatar Video]
+    G2 --> G3[Auto-Translate to Viewer's Language]
+    G3 --> G4[Bank Mitra Verification]
+    G4 --> G5[Saathi Points Awarded]
+
+    H --> H1[Request In-App Call]
+    H --> H2[Direct tel: Redirect]
+    H1 --> H3[Bank Mitra Dashboard - staff]
+
+    I --> I1[Saathi Points + Badges]
+    I --> I2[Accessibility Settings]
+```
+
+## Component Architecture
+
+```mermaid
+graph LR
+    App["App.jsx (root)"] --> State["screen state (routing)"]
+    App --> Shell["Shell + BottomNav"]
+
+    Shell --> Home
+    Shell --> Scan
+    Shell --> Community
+    Shell --> SaathiChat
+    Shell --> Profile
+
+    Scan --> Processing --> Result
+    Result --> BankMitra
+    Community --> BankMitraDashboard
+
+    subgraph Shared Components
+        PersonAvatar
+        Badge
+        VerifiedBadge
+        Card
+        PrimaryButton
+        HapticViz
+    end
+
+    subgraph Data Layer - mock, swappable
+        STR["STR - language strings"]
+        DOCS["DOCS - risk documents"]
+        COMMUNITY["COMMUNITY - voice experiences"]
+        MITRA["MITRA - Bank Mitra profile"]
+    end
+
+    Home -.-> STR
+    Result -.-> DOCS
+    Community -.-> COMMUNITY
+    BankMitra -.-> MITRA
+```
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| UI Framework | React (function components + hooks) |
+| Styling | Tailwind CSS |
+| Icons | lucide-react |
+| Routing | Local `screen` state (no router library) |
+| State | React `useState` / `useEffect`, per-screen |
+| Backend | None yet — mock data layer |
+| Build | Vite |
+
+## Folder Structure
+
+```
+sunosaathi/
+├── src/
+│   ├── App.jsx          # entire app: components, screens, mock data
+│   ├── main.jsx         # React entry point
+│   └── index.css        # Tailwind imports
+├── index.html
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+└── postcss.config.js
+```
+
+## Design Decisions
+
+- **No router library** — screens are swapped via a single `screen` state variable (`go(next)`), since the app is a linear, mobile-first flow rather than a multi-route site.
+- **Mock service layer** — all "AI" outputs (OCR, risk scoring, translation, voice-to-video) are pre-built JS objects/functions, structured so real APIs (OCR, STT, translation, TTS) can be dropped in behind the same function names (`analyzeDocument()`, `translateText()`, etc.) later.
+- **Single-file component tree** — kept in one `App.jsx` for prototype portability (drop into Lovable/Bolt/Replit); can be split into `/components`, `/screens`, `/data` folders as the codebase grows.
+
+## Future / Real Integration Points
+
+| Mock today | Replace with |
+|---|---|
+| `DOCS` object | OCR + financial risk-extraction API |
+| `STR` translations (non-hi/en deep content) | Real translation API (Bhashini / Google Translate) |
+| Voice → video conversion | Speech-to-text + TTS + 2D avatar generation service |
+| `tel:` redirect | Telephony/VoIP integration (Twilio, Exotel) |
+| Bank Mitra call flow | Real-time call routing backend |
+| Community feed | Database (Postgres/Firebase) + moderation queue |
 
 An inclusive AI-powered financial safety companion prototype (React + Tailwind).
 
