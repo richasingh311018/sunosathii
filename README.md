@@ -1,4 +1,4 @@
-# SunoSaathii — Working Prototype
+# Working Prototype
 # SunoSaathii
 
 AI-powered financial safety companion for low-literacy, first-time, and rural/semi-urban users — helps people understand financial documents before they sign.
