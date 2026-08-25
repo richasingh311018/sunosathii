@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { LANGUAGES, getL, isMockLang } from "./i18n";
+import { LanguageProvider, useLanguage } from "./LanguageContext";
 import {
   Camera, Mic, Users, Phone, Trophy, Globe, ShieldCheck, Volume2,
   Vibrate, Settings, ChevronRight, Check, AlertTriangle, X, Play,
@@ -33,7 +35,7 @@ const C = {
 /* ------------------------------------------------------------------ */
 /*  Language + content data                                           */
 /* ------------------------------------------------------------------ */
-const LANGUAGES = [
+const LOCAL_LANGUAGES = [
   { code: "hi", native: "हिंदी", label: "Hindi" },
   { code: "en", native: "English", label: "English" },
   { code: "bn", native: "বাংলা", label: "Bengali" },
@@ -47,7 +49,7 @@ const LANGUAGES = [
   { code: "ur", native: "اردو", label: "Urdu" },
 ];
 
-const STR = {
+const LOCAL_STR = {
   hi: {
     welcomeTitle: "SunoSaathi",
     tagline: "समझो। सुरक्षित रहो। सही फैसला लो।",
@@ -127,8 +129,8 @@ const STR = {
     reasonsTitle: "What to check",
   },
 };
-const getL = (lang) => STR[lang] || STR.en;
-const isMockLang = (lang) => lang && lang !== "hi" && lang !== "en";
+const getL_LOCAL = (lang) => LOCAL_STR[lang] || LOCAL_STR.en;
+const isMockLang_LOCAL = (lang) => lang && lang !== "hi" && lang !== "en";
 
 const DOCS = {
   safe: {
@@ -390,10 +392,9 @@ function HapticViz({ risk, active }) {
 /* ------------------------------------------------------------------ */
 /*  Main app                                                          */
 /* ------------------------------------------------------------------ */
-export default function SunoSaathi() {
+function SunoSaathi() {
   const [screen, setScreen] = useState("welcome");
   const [prevScreen, setPrevScreen] = useState("welcome");
-  const [lang, setLang] = useState(null);
   const [points, setPoints] = useState(180);
   const [access, setAccess] = useState({ highContrast: false, largeText: false });
   const [docKey, setDocKey] = useState(null);
@@ -408,7 +409,8 @@ export default function SunoSaathi() {
   const [toast, setToast] = useState(null);
   const audioTimer = useRef(null);
 
-  const L = getL(lang || "en");
+  const { lang, setLang, L: ctxL } = useLanguage();
+  const L = ctxL;
   const mock = isMockLang(lang);
 
   function go(next) {
@@ -601,8 +603,11 @@ function Welcome({ go }) {
 function LanguageSelect({ go, lang, setLang }) {
   const [detecting, setDetecting] = useState(false);
   function pick(code) {
+    // persist is handled by LanguageProvider, but keep a best-effort localStorage write for non-react use
+    try { localStorage.setItem("lang", code); } catch (e) {}
     setLang(code);
-    go("home");
+    // navigate back to home — language changes will re-render instantly via LanguageContext
+    setTimeout(() => go("home"), 10);
   }
   function detect() {
     setDetecting(true);
@@ -1496,5 +1501,14 @@ function Pitch({ L, go }) {
         Back to app
       </button>
     </div>
+  );
+}
+
+// App wrapper that provides language context to the app
+export default function App() {
+  return (
+    <LanguageProvider>
+      <SunoSaathi />
+    </LanguageProvider>
   );
 }
