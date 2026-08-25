@@ -570,6 +570,7 @@ function chatReply(text, lang) {
 /*  Welcome                                                            */
 /* ------------------------------------------------------------------ */
 function Welcome({ go }) {
+  const { L } = useLanguage();
   return (
     <div
       className="w-full mx-auto flex flex-col items-center justify-center text-center px-8"
@@ -577,20 +578,20 @@ function Welcome({ go }) {
     >
       <div className="flex-1" />
       <SaathiFace size={92} />
-      <h1 className="mt-6 text-3xl font-bold tracking-tight">SunoSaathi</h1>
-      <p className="mt-3 text-base opacity-90">समझो। सुरक्षित रहो। सही फैसला लो।</p>
-      <p className="mt-1 text-sm opacity-70">Understand. Stay Safe. Decide Right.</p>
+      <h1 className="mt-6 text-3xl font-bold tracking-tight">{L.welcomeTitle}</h1>
+      <p className="mt-3 text-base opacity-90">{L.tagline}</p>
+      <p className="mt-1 text-sm opacity-70">{L.tagline}</p>
       <div className="flex-1" />
       <div className="w-full pb-10 flex flex-col gap-3">
         <PrimaryButton onClick={() => go("language")} color="#fff" style={{ color: C.navy }}>
-          Start with Saathi <ChevronRight size={18} />
+          {L.start} <ChevronRight size={18} />
         </PrimaryButton>
         <button
           onClick={() => { go("language"); }}
           className="w-full py-3 rounded-xl font-medium text-white border"
           style={{ borderColor: "rgba(255,255,255,0.4)" }}
         >
-          Continue as Demo User
+          {L.demo}
         </button>
       </div>
     </div>
@@ -601,12 +602,11 @@ function Welcome({ go }) {
 /*  Language select                                                   */
 /* ------------------------------------------------------------------ */
 function LanguageSelect({ go, lang, setLang }) {
+  const { L } = useLanguage();
   const [detecting, setDetecting] = useState(false);
   function pick(code) {
-    // persist is handled by LanguageProvider, but keep a best-effort localStorage write for non-react use
     try { localStorage.setItem("lang", code); } catch (e) {}
     setLang(code);
-    // navigate back to home — language changes will re-render instantly via LanguageContext
     setTimeout(() => go("home"), 10);
   }
   function detect() {
@@ -617,16 +617,16 @@ function LanguageSelect({ go, lang, setLang }) {
     <div className="w-full mx-auto flex flex-col px-5 py-8" style={{ maxWidth: 430, minHeight: 640, height: "100%", background: C.bg }}>
       <SaathiFace size={56} />
       <h2 className="mt-5 text-xl font-semibold" style={{ color: C.navy }}>
-        Aap SunoSaathi ko kis bhasha mein use karna chahte hain?
+        {L.chooseLang}
       </h2>
-      <p className="text-sm mt-1" style={{ color: C.textMute }}>Which language would you like to use SunoSaathi in?</p>
+      <p className="text-sm mt-1" style={{ color: C.textMute }}>{L.chooseLang}</p>
 
       <button
         onClick={detect}
         className="mt-5 w-full py-3 rounded-xl border flex items-center justify-center gap-2 font-medium"
         style={{ borderColor: C.blue, color: C.blue, background: C.blueSoft }}
       >
-        <Globe size={18} /> {detecting ? "Detecting…" : "Detect my language automatically"}
+        <Globe size={18} /> {detecting ? "Detecting…" : L.detect}
       </button>
 
       <div className="grid grid-cols-2 gap-3 mt-5">
